@@ -8,10 +8,12 @@
     - name: migrate
       shell: >
         chdir={{ edxapp_code_dir }}
-        python manage.py {{ item }} migrate --noinput {{ db_dry_run }} --settings=aws_migrate
+        python manage.py {{ item[0] }} migrate --database {{ item[1] }} --noinput {{ db_dry_run }} --settings=aws_migrate
       environment:
         DB_MIGRATION_USER: "{{ COMMON_MYSQL_MIGRATE_USER }}"
         DB_MIGRATION_PASS: "{{ COMMON_MYSQL_MIGRATE_PASS }}"
-      with_items:
-        - lms
-        - cms
+      # Migrate any database in the config, but not the read_replica
+      when: item[1] != 'read_replica'
+      with_nested:
+        - [ 'lms', 'cms' ]
+        - "{{ DATABASES.keys() }}"
