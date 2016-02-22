@@ -136,6 +136,7 @@
   tags:
     - install
     - install:configuration
+    - edxapp_helper_scripts
 
 # migrate when the migrate user is overridden in extra vars
 - name: migrate
