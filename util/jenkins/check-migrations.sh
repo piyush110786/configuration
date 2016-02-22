@@ -64,6 +64,8 @@ ansible-playbook -c local $extra_var_args --tags edxapp_cfg -i localhost, -s -U 
 # Run migrations and replace literal '\n' with actual newlines to make the output
 # easier to read
 
+extra_var_args+=" -e@${WORKSPACE}/lms.auth.yaml"
+
 ansible-playbook -v -c local $extra_var_args -i localhost, -s -U jenkins edxapp_migrate.yml | sed 's/\\n/\n/g'
 
 #We don't care about the exit status of the `sed`
