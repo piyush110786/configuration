@@ -11,13 +11,15 @@ import time
 
 # Services that should be checked for migrations.
 MIGRATION_COMMANDS = {
-        'lms':     ". {env_file}; {python} {code_dir}/manage.py lms migrate --noinput --list --settings=aws",
-        'cms':     ". {env_file}; {python} {code_dir}/manage.py cms migrate --noinput --list --settings=aws",
-        'xqueue': "{python} {code_dir}/manage.py xqueue migrate --noinput --settings=aws --db-dry-run --merge",
-        'ecommerce':     ". {env_file}; {python} {code_dir}/manage.py migrate --noinput --list",
-        'programs':     ". {env_file}; {python} {code_dir}/manage.py migrate --noinput --list",
-        'insights':      ". {env_file}; {python} {code_dir}/manage.py migrate --noinput --list",
-        'analytics_api': ". {env_file}; {python} {code_dir}/manage.py migrate --noinput --list"
+        'lms':     [ ". {env_file}; {python} {code_dir}/manage.py lms migrate --noinput --list --settings=aws",
+                     ". {env_file}; {python} {code_dir}/manage.py lms migrate --database=student_module_history --noinput --list --settings=aws" ],
+        'cms':     [ ". {env_file}; {python} {code_dir}/manage.py cms migrate --noinput --list --settings=aws",
+                     ". {env_file}; {python} {code_dir}/manage.py cms migrate --database=student_module_history --noinput --list --settings=aws" ],
+        'xqueue':        [ "{python} {code_dir}/manage.py xqueue migrate --noinput --settings=aws --db-dry-run --merge" ],
+        'ecommerce':     [ ". {env_file}; {python} {code_dir}/manage.py migrate --noinput --list" ],
+        'programs':      [ ". {env_file}; {python} {code_dir}/manage.py migrate --noinput --list" ],
+        'insights':      [ ". {env_file}; {python} {code_dir}/manage.py migrate --noinput --list" ],
+        'analytics_api': [ ". {env_file}; {python} {code_dir}/manage.py migrate --noinput --list" ]
     }
 HIPCHAT_USER = "PreSupervisor"
 
@@ -208,7 +210,7 @@ if __name__ == '__main__':
             if service in MIGRATION_COMMANDS:
                 # Do extra migration related stuff.
                 if service == 'xqueue' and args.xqueue_code_dir:
-                    cmd = MIGRATION_COMMANDS[service].format(python=args.xqueue_python,
+                    cmd = MIGRATION_COMMANDS[service][0].format(python=args.xqueue_python,
                         code_dir=xqueue_code_dir)
                     if os.path.exists(args.xqueue_code_dir):
                         os.chdir(args.xqueue_code_dir)
@@ -229,13 +231,14 @@ if __name__ == '__main__':
                     if service in services and all(arg!=None for arg in services[service].values()) and service in MIGRATION_COMMANDS:
                         serv_vars = services[service]
 
-                        cmd = MIGRATION_COMMANDS[service].format(**serv_vars)
-                        if os.path.exists(serv_vars['code_dir']):
-                            os.chdir(serv_vars['code_dir'])
-                            # Run migration check command.
-                            output = subprocess.check_output(cmd, shell=True, )
-                            if '[ ]' in output:
-                                raise Exception("Migrations have not been run for {}".format(service))
+                        for migration_command in MIGRATION_COMMANDS[service]:
+                            cmd = migration_command.format(**serv_vars)
+                            if os.path.exists(serv_vars['code_dir']):
+                                os.chdir(serv_vars['code_dir'])
+                                # Run migration check command.
+                                output = subprocess.check_output(cmd, shell=True, )
+                                if '[ ]' in output:
+                                    raise Exception("Migrations have not been run for {}".format(service))
 
 
             # Link to available service.
