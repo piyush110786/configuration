@@ -662,6 +662,10 @@ edxapp_generic_auth_config:  &edxapp_generic_auth
     ADDITIONAL_OPTIONS: "{{ EDXAPP_CONTENTSTORE_ADDITIONAL_OPTS }}"
     DOC_STORE_CONFIG: *edxapp_generic_default_docstore
   DATABASES:
+    # edxapp's edxapp-migrate scripts and the edxapp_migrate play
+    # will ensure that any DB not named read_replica will be migrated
+    # for both the lms and cms.  If you don't want to migrate one of
+    # these DBs for the cms, ensure you override DATABASES in cms_auth_config.
     read_replica:
       ENGINE: 'django.db.backends.mysql'
       NAME: "{{ EDXAPP_MYSQL_REPLICA_DB_NAME }}"
