@@ -12,6 +12,8 @@
 # bash <(curl -s https://raw.githubusercontent.com/edx/configuration/master/util/install/ansible-bootstrap.sh)
 
 set -xe
+CONFIGURATION_REPO='https://github.com/piyush110786/configuration.git'
+CONFIGURATION_VERSION='named-release/dogwood.rc'
 
 if [[ -z "${ANSIBLE_REPO}" ]]; then
   ANSIBLE_REPO="https://github.com/edx/ansible.git"
